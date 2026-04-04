@@ -1,0 +1,12 @@
+<body style="background:#1b1b2f;color:white">
+<h2 style="text-align:center">High Churn Customers</h2>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+{% for r in data %}
+<div style="background:#e63946;margin:15px;padding:20px;border-radius:10px">
+Customer {{r.CustomerId}} |
+Churn {{r.Churn_Prob}} %
+<a href="/retention/{{r.CustomerId}}">View Strategy</a>
+</div>
+{% endfor %}
+
+</body>

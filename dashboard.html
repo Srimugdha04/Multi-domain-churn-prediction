@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Bank Churn Dashboard</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+<div class="navbar">
+<div class="logo">🏦 SmartBank AI</div>
+<div class="nav-links">
+<a href="/customers">Customers</a>
+<a href="/highrisk">High Risk</a>
+<a href="/download">Download</a>
+<a href="/logout">Logout</a>
+</div>
+</div>
+
+<div class="container">
+<h1>Customer Churn Analytics Dashboard</h1>
+
+<div class="cards">
+<div class="card total">
+<p>Total Customers</p>
+<h2>{{total}}</h2>
+</div>
+
+<div class="card high">
+<p>High Risk</p>
+<h2>{{high}}</h2>
+</div>
+
+<div class="card medium">
+<p>Medium Risk</p>
+<h2>{{medium}}</h2>
+</div>
+
+<div class="card low">
+<p>Low Risk</p>
+<h2>{{low}}</h2>
+</div>
+</div>
+
+</div>
+
+</body>
+</html>

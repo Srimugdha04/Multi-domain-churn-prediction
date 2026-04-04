@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Bank Churn AI Login</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<style>
+body{
+margin:0;
+font-family: 'Segoe UI', sans-serif;
+background:#f4f7fb;
+color:#1b2a4e;
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;
+color:white;
+}
+
+.card{
+background:#121826;
+padding:40px;
+border-radius:15px;
+width:350px;
+box-shadow:0 0 20px rgba(0,0,0,0.6);
+text-align:center;
+}
+
+input{
+width:100%;
+padding:12px;
+margin-top:15px;
+border:none;
+border-radius:8px;
+background:#1f2937;
+color:white;
+}
+
+button{
+margin-top:20px;
+width:100%;
+padding:12px;
+background:#00c6ff;
+border:none;
+border-radius:8px;
+font-weight:bold;
+cursor:pointer;
+}
+
+button:hover{
+background:#00a8e6;
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="card">
+<h2>🏦 Bank Retention AI</h2>
+<form method="POST" action="/">
+<input name="username" placeholder="Username">
+<input name="password" type="password" placeholder="Password">
+<button type="submit">Login</button>
+</form>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,16 @@
+<body style="background:#16213e;color:white;font-family:Segoe UI">
+
+<h1 style="text-align:center">Customer {{c.CustomerId}}</h1>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<div style="margin:auto;width:40%;background:#0f3460;padding:30px;border-radius:12px">
+Age : {{c.Age}} <br><br>
+Balance : {{c.Balance}} <br><br>
+Products : {{c.NumOfProducts}} <br><br>
+Churn Probability : {{c.Churn_Prob}} % <br><br>
+Risk : {{c.Risk}} <br><br>
+
+<a style= "color:white" href="/retention/{{c.CustomerId}}">View Retention Strategy</a>
+
+</div>
+
+</body>

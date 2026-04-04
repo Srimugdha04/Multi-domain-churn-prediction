@@ -1,0 +1,17 @@
+<body style="background:#0f172a;color:white;font-family:Segoe UI">
+
+<h1 style="text-align:center">Retention Plan</h1>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<div style="width:50%;margin:auto;background:#1e293b;padding:30px;border-radius:12px">
+
+<h3>Customer ID : {{cid}}</h3>
+
+<ul>
+{% for i in s %}
+<li>{{i}}</li>
+{% endfor %}
+</ul>
+
+</div>
+
+</body>

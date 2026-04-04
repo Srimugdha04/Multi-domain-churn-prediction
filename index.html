@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>AI Customer Churn Dashboard</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<style>
+body{
+font-family:Poppins;
+margin:0;
+background:linear-gradient(120deg,#0f2027,#203a43,#2c5364);
+color:white;
+}
+
+.header{
+padding:20px;
+font-size:28px;
+font-weight:700;
+text-align:center;
+background:rgba(0,0,0,0.3);
+letter-spacing:2px;
+}
+
+.container{
+padding:30px;
+}
+
+.card-container{
+display:flex;
+gap:25px;
+flex-wrap:wrap;
+margin-bottom:30px;
+}
+
+.card{
+flex:1;
+min-width:220px;
+background:rgba(255,255,255,0.1);
+backdrop-filter: blur(10px);
+padding:20px;
+border-radius:15px;
+box-shadow:0 10px 25px rgba(0,0,0,0.4);
+transition:0.3s;
+}
+
+.card:hover{
+transform:scale(1.05);
+}
+
+.card h2{
+margin:0;
+font-size:18px;
+opacity:0.8;
+}
+
+.card p{
+font-size:30px;
+margin:10px 0 0;
+font-weight:700;
+}
+
+.table-box{
+background:rgba(255,255,255,0.08);
+padding:20px;
+border-radius:15px;
+box-shadow:0 10px 25px rgba(0,0,0,0.4);
+overflow:auto;
+max-height:450px;
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+}
+
+th,td{
+padding:12px;
+text-align:center;
+}
+
+th{
+background:#00c6ff;
+color:black;
+}
+
+tr:nth-child(even){
+background:rgba(255,255,255,0.05);
+}
+
+.high{
+color:#ff4d4d;
+font-weight:bold;
+}
+
+.medium{
+color:#ffd633;
+font-weight:bold;
+}
+
+.low{
+color:#66ff99;
+font-weight:bold;
+}
+
+.footer{
+text-align:center;
+padding:15px;
+opacity:0.7;
+margin-top:20px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+🤖 AI Multi‑Domain Customer Churn Prediction System
+</div>
+
+<div class="container">
+
+<div class="card-container">
+<div class="card">
+<h2>Total Customers</h2>
+<p id="total"></p>
+</div>
+
+<div class="card">
+<h2>High Risk Customers</h2>
+<p id="high"></p>
+</div>
+
+<div class="card">
+<h2>Medium Risk Customers</h2>
+<p id="medium"></p>
+</div>
+
+<div class="card">
+<h2>Low Risk Customers</h2>
+<p id="low"></p>
+</div>
+</div>
+
+<div class="table-box">
+<table id="data-table">
+<thead>
+<tr>
+<th>Customer ID</th>
+<th>Credit Score</th>
+<th>Balance</th>
+<th>Tenure</th>
+<th>Churn Probability</th>
+<th>Risk</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+</div>
+
+</div>
+
+<div class="footer">
+AI Final Year Project — Deep Learning Transfer Learning Model
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+
+<script>
+
+Papa.parse("prediction_output.csv",{
+download:true,
+header:true,
+complete:function(results){
+
+let data = results.data;
+
+let high=0,med=0,low=0;
+
+let table = document.querySelector("#data-table tbody");
+
+data.forEach(row=>{
+
+if(!row.CustomerId) return;
+
+let risk=row.Risk;
+
+if(risk=="High") high++;
+else if(risk=="Medium") med++;
+else low++;
+
+let riskClass = risk=="High"?"high":risk=="Medium"?"medium":"low";
+
+table.innerHTML += `
+<tr>
+<td>${row.CustomerId}</td>
+<td>${row.CreditScore}</td>
+<td>${row.Balance}</td>
+<td>${row.Tenure}</td>
+<td>${parseFloat(row.Churn_Prob).toFixed(2)}%</td>
+<td class="${riskClass}">${risk}</td>
+</tr>
+`;
+});
+
+document.getElementById("total").innerText = high+med+low;
+document.getElementById("high").innerText = high;
+document.getElementById("medium").innerText = med;
+document.getElementById("low").innerText = low;
+
+}
+});
+
+</script>
+
+</body>
+</html>
