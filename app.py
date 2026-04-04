@@ -1,77 +1,155 @@
-import streamlit as st
-import numpy as np
-import joblib
-from tensorflow.keras.models import load_model
+from flask import Flask, render_template, request, redirect, url_for, session, send_file
+import pandas as pd
 
-# =============================
-# PAGE CONFIG
-# =============================
-st.set_page_config(page_title="Multi-Domain Churn Prediction", layout="centered")
+app = Flask(__name__)
+app.secret_key = "churn_secret"
 
-st.title("📊 Multi-Domain Customer Churn Prediction")
-st.markdown("Transfer Learning Model (Telecom → Banking)")
+# ================= LOAD DATA =================
+df = pd.read_csv("prediction_output.csv")
+df.columns = df.columns.str.strip()
 
-# =============================
-# LOAD MODEL & SCALER
-# =============================
-@st.cache_resource
-def load_artifacts():
-    model = load_model("transfer_model.keras")
-    scaler = joblib.load("scaler.pkl")
-    return model, scaler
-
-model, scaler = load_artifacts()
-
-# =============================
-# INPUT SECTION
-# =============================
-st.header("Enter Customer Details")
-
-account_length = st.number_input("Tenure / Account Length", min_value=0, value=5)
-total_day_charge = st.number_input("Balance / Financial Usage", min_value=0.0, value=5000.0)
-customer_service_calls = st.number_input("Complaints", min_value=0, value=0)
-international_plan = st.selectbox("Has Credit Card / International Plan", [0,1])
-voice_mail_plan = st.selectbox("Is Active Member / Voice Plan", [0,1])
-total_day_minutes = st.number_input("Estimated Salary / Usage Proxy", min_value=0.0, value=3000.0)
-total_intl_calls = st.number_input("Number of Products / Service Usage", min_value=0, value=1)
-
-# =============================
-# PREDICT BUTTON
-# =============================
-if st.button("Predict Churn Risk"):
-
-    input_data = np.array([[
-        account_length,
-        total_day_charge,
-        customer_service_calls,
-        international_plan,
-        voice_mail_plan,
-        total_day_minutes,
-        total_intl_calls
-    ]])
-
-    input_scaled = scaler.transform(input_data)
-    probability = model.predict(input_scaled)[0][0]
-
-    st.subheader("Prediction Result")
-
-    st.metric("Churn Probability", f"{probability*100:.2f}%")
-
-    if probability >= 0.75:
-        st.error("⚠ High Risk Customer")
-    elif probability >= 0.4:
-        st.warning("⚠ Medium Risk Customer")
+# ⭐ NEW RISK LOGIC (UPDATED AS YOU ASKED)
+def risk_category(p):
+    if p >= 65:
+        return "High"
+    elif p >= 30:
+        return "Medium"
     else:
-        st.success("✅ Low Risk Customer")
+        return "Low"
 
-    st.progress(float(probability))
+df["Risk"] = df["Churn_Prob"].apply(risk_category)
 
-    st.markdown("---")
-    st.markdown("### Business Recommendation")
+# ================= LOGIN =================
+@app.route("/", methods=["GET","POST"])
+def login():
+    if request.method == "POST":
+        username = request.form.get("username")
+        password = request.form.get("password")
 
-    if probability >= 0.75:
-        st.write("Immediate retention offer recommended.")
-    elif probability >= 0.4:
-        st.write("Targeted engagement strategy suggested.")
+        if username == "admin" and password == "bank123":
+            session["user"] = username
+            return redirect(url_for("dashboard"))
+        else:
+            return render_template("login.html", error="Invalid Credentials")
+
+    return render_template("login.html")
+
+
+# ================= DASHBOARD =================
+@app.route("/dashboard")
+def dashboard():
+    if "user" not in session:
+        return redirect(url_for("login"))
+
+    total = len(df)
+    high = len(df[df["Risk"]=="High"])
+    medium = len(df[df["Risk"]=="Medium"])
+    low = len(df[df["Risk"]=="Low"])
+
+    return render_template(
+        "dashboard.html",
+        total=total,
+        high=high,
+        medium=medium,
+        low=low
+    )
+
+
+# ================= CUSTOMER LIST =================
+@app.route("/customers")
+def customers():
+    if "user" not in session:
+        return redirect(url_for("login"))
+
+    return render_template(
+        "customer.html",     # ⭐ IMPORTANT (your template name)
+        data=df.to_dict(orient="records")
+    )
+
+
+# ================= HIGH RISK PAGE =================
+@app.route("/highrisk")
+def highrisk():
+    if "user" not in session:
+        return redirect(url_for("login"))
+
+    high_df = df[df["Risk"]=="High"]
+
+    return render_template(
+        "highrisk.html",
+        data=high_df.to_dict(orient="records")
+    )
+
+
+# ================= CUSTOMER DETAIL =================
+@app.route("/customer/<cid>")
+def customer(cid):
+    if "user" not in session:
+        return redirect(url_for("login"))
+
+    row = df[df["CustomerId"] == int(cid)]
+
+    if row.empty:
+        return "Customer Not Found"
+
+    data = row.iloc[0].to_dict()
+
+    return render_template(
+        "customer_detail.html",
+        c=data
+    )
+
+
+# ================= RETENTION STRATEGY =================
+@app.route("/retention/<cid>")
+def retention(cid):
+    if "user" not in session:
+        return redirect(url_for("login"))
+
+    row = df[df["CustomerId"] == int(cid)]
+    prob = float(row["Churn_Prob"].values[0])
+
+    if prob >= 80:
+        strategies = [
+            "Premium Credit Card Upgrade",
+            "Dedicated Relationship Manager",
+            "Loan Interest Discount",
+            "10% Cashback Offers",
+            "Free Insurance Bundle"
+        ]
+    elif prob >= 65:
+        strategies = [
+            "Loyalty Reward Points Boost",
+            "Special Fixed Deposit Interest",
+            "Mobile Banking Privileges",
+            "Personalised Banking Offers"
+        ]
     else:
-        st.write("Customer considered stable.")
+        strategies = [
+            "Financial Advisory Emails",
+            "Customer Engagement Campaign"
+        ]
+
+    return render_template(
+        "retention.html",
+        s=strategies,
+        cid=cid
+    )
+
+
+# ================= DOWNLOAD CSV =================
+@app.route("/download")
+def download():
+    return send_file("prediction_output.csv", as_attachment=True)
+
+
+# ================= LOGOUT =================
+@app.route("/logout")
+def logout():
+    session.pop("user", None)
+    return redirect(url_for("login"))
+
+
+# ================= RUN =================
+if __name__ == "__main__":
+    app.run(debug=True)
