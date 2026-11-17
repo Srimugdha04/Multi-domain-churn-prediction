@@ -1,0 +1,23 @@
+{
+    "model_name": "Random Transfer - Fine-tuned",
+    "model_file": "random_transfer_control_finetuned_best.keras",
+    "threshold": 0.62,
+    "input_features": [
+        "CreditScore",
+        "Geography",
+        "Gender",
+        "Age",
+        "Tenure",
+        "Balance",
+        "NumOfProducts",
+        "HasCrCard",
+        "IsActiveMember",
+        "EstimatedSalary",
+        "Satisfaction Score",
+        "Card Type",
+        "Point Earned"
+    ],
+    "processed_feature_count": 19,
+    "positive_class": 1,
+    "positive_class_label": "Churn"
+}

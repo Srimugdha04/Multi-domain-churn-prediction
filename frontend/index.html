@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Domain Churn Prediction</title>
+    <meta name="description" content="Multi-Domain Transfer Learning: Adapting Telecom insights to Banking churn predictions.">
+
+    <!-- Font Awesome Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Google Fonts (loaded via CSS) -->
+    <!-- Project Stylesheet -->
+    <link rel="stylesheet" href="/static/css/style.css">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<!-- =====================================================
+     LOGIN OVERLAY
+     ===================================================== -->
+<div id="login-overlay">
+    <div class="login-card">
+        <div class="login-logo"><i class="fas fa-university" style="color:#0095e8;"></i></div>
+        <h3>Churn Predictor</h3>
+        <p>Cross-Domain (Telecom &rarr; Banking) Analytics</p>
+
+        <input  class="login-input" type="email"    id="email" placeholder="Email address" autocomplete="username">
+        <input  class="login-input" type="password" id="pass"  placeholder="Password"      autocomplete="current-password">
+
+        <div id="login-error" style="
+            display:none; margin-top:10px; padding:10px 14px;
+            background:#fff0f2; color:#f64e60; border-radius:8px;
+            font-size:0.82rem; border:1px solid #ffd6db;
+        "></div>
+
+        <button class="login-btn" id="login-btn" onclick="login()">Sign In</button>
+        
+
+    </div>
+</div>
+
+
+<!-- =====================================================
+     APP SHELL (hidden until logged in)
+     ===================================================== -->
+
+<!-- SIDEBAR -->
+<nav class="sidebar">
+    <div class="sidebar-logo">
+        <i class="fas fa-chart-network"></i>
+        <span style="font-size:1rem;">CHURN PREDICTOR</span>
+    </div>
+
+    <p class="nav-section-title">Navigation</p>
+
+    <div class="nav-item active" id="nav-dashboard" onclick="switchTab('dashboard', this)">
+        <i class="fas fa-table-columns"></i> Dashboard
+    </div>
+    <div class="nav-item" id="nav-customers" onclick="switchTab('customers', this)">
+        <i class="fas fa-users"></i> Customers
+    </div>
+    <div class="nav-item" id="nav-graph" onclick="showGraph()">
+        <i class="fas fa-chart-line"></i> Graphical Representation
+    </div>  
+
+    <p class="nav-section-title" style="margin-top:24px;">Account</p>
+    <div class="nav-item" onclick="logout()" style="color:#f64e60;">
+        <i class="fas fa-right-from-bracket"></i> Logout
+    </div>
+
+</nav>
+
+
+<!-- MAIN AREA -->
+<div class="main">
+
+    <!-- Top Bar -->
+    <div class="topbar">
+        <span class="topbar-title" id="view-title">Bank Ledger</span>
+        <div class="topbar-right">
+            <div class="topbar-bank-badge">
+                <i class="fas fa-building-columns"></i>
+                <span id="topbar-bank">...</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scrollable Content -->
+    <div class="content">
+
+        <!-- Stats Row -->
+        <div class="stats-row">
+            <div class="stat-card">
+                <div class="stat-icon blue"><i class="fas fa-users"></i></div>
+                <div>
+                    <div class="stat-label">Total Customers</div>
+                    <div class="stat-value" id="stat-total">—</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon green"><i class="fas fa-building-columns"></i></div>
+                <div>
+                    <div class="stat-label">Bank</div>
+                    <div class="stat-value" id="stat-bank" style="font-size:1.1rem; padding-top:4px;">—</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon red"><i class="fas fa-triangle-exclamation"></i></div>
+                <div>
+                    <div class="stat-label">High Risk</div>
+                    <div class="stat-value" id="stat-highrisk" style="color:#f64e60;">—</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ledger Card -->
+        <div class="card-header">
+    <span class="card-title">
+        <i class="fas fa-list-check" style="margin-right:8px;color:#0095e8;"></i>
+        Customer Ledger
+    </span>
+
+    <div style="display:flex;align-items:center;gap:15px;">
+        <span style="font-size:0.8rem;color:#a2a3b7;">
+            Live Banking Portfolio
+        </span>
+        <button class="btn-create-customer" onclick="openCreateCustomer()">
+            <i class="fas fa-user-plus"></i> Create Customer
+        </button>
+    </div>
+</div>
+            <div class="card-body">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Customer</th>
+                            <th>Tenure</th>
+                            <th>Balance</th>
+                            <th>Churn Risk</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ledger-body">
+                        <!-- Populated by JS -->
+                    </tbody>
+                </table>
+            </div>
+            <button class="btn-predict" id="predict-btn" onclick="predictAll()">
+                <i class="fas fa-brain"></i> PREDICT ALL CUSTOMER CHURN
+            </button>
+        </div>
+
+    </div><!-- /content -->
+</div><!-- /main -->
+
+
+<!-- =====================================================
+     AI CHAT BOT
+     ===================================================== -->
+<div id="bot-window">
+    <div class="bot-header">
+        <div class="bot-header-icon"><i class="fas fa-robot"></i></div>
+        <div>
+            <div class="bot-header-title">Nexa AI Advisor</div>
+            <div class="bot-header-status">Online</div>
+        </div>
+    </div>
+    <div id="chat-logs"></div>
+    <div class="bot-input-area">
+        <input type="text" id="chat-input" placeholder="Ask Nexa anything...">
+        <button class="btn-send" onclick="sendMsg()"><i class="fas fa-paper-plane"></i></button>
+    </div>
+</div>
+
+<!-- FAB to open chat -->
+<div class="fab" onclick="toggleBot()" title="Open AI Chat">
+    <i class="fas fa-robot"></i>
+</div>
+
+<!-- CREATE CUSTOMER MODAL -->
+<div id="create-customer-modal" class="graph-modal-overlay" style="display:none;">
+    <div class="create-customer-card">
+
+        <div class="graph-modal-header">
+            <h3><i class="fas fa-user-plus"></i> Create New Customer</h3>
+            <button class="graph-close-btn" onclick="closeCreateCustomer()" aria-label="Close form">&times;</button>
+        </div>
+
+        <form id="create-customer-form" onsubmit="submitNewCustomer(event)">
+            <div class="customer-form-grid">
+
+                <label>Customer Name
+                    <input name="name" type="text" maxlength="100" required placeholder="Enter customer name">
+                </label>
+
+                <label>Credit Score
+                    <input name="CreditScore" type="number" min="350" max="850" step="1" required>
+                </label>
+
+                <label>Geography
+                    <select name="Geography" required>
+                        <option value="">Select geography</option>
+                        <option>France</option>
+                        <option>Germany</option>
+                        <option>Spain</option>
+                    </select>
+                </label>
+
+                <label>Gender
+                    <select name="Gender" required>
+                        <option value="">Select gender</option>
+                        <option>Female</option>
+                        <option>Male</option>
+                    </select>
+                </label>
+
+                <label>Age
+                    <input name="Age" type="number" min="18" max="92" step="1" required>
+                </label>
+
+                <label>Tenure (Years)
+                    <input name="Tenure" type="number" min="0" max="10" step="1" required>
+                </label>
+
+                <label>Balance
+                    <input name="Balance" type="number" min="0" max="250898.09" step="0.01" required>
+                </label>
+
+                <label>Number of Products
+                    <input name="NumOfProducts" type="number" min="1" max="4" step="1" required>
+                </label>
+
+                <label>Has Credit Card?
+                    <select name="HasCrCard" required>
+                        <option value="">Select</option>
+                        <option value="1">Yes</option>
+                        <option value="0">No</option>
+                    </select>
+                </label>
+
+                <label>Active Member?
+                    <select name="IsActiveMember" required>
+                        <option value="">Select</option>
+                        <option value="1">Yes</option>
+                        <option value="0">No</option>
+                    </select>
+                </label>
+
+                <label>Estimated Salary
+                    <input name="EstimatedSalary" type="number" min="11.58" max="199992.48" step="0.01" required>
+                </label>
+
+                <label>Satisfaction Score
+                    <input name="Satisfaction Score" type="number" min="1" max="5" step="1" required>
+                </label>
+
+                <label>Card Type
+                    <select name="Card Type" required>
+                        <option value="">Select card type</option>
+                        <option>DIAMOND</option>
+                        <option>GOLD</option>
+                        <option>PLATINUM</option>
+                        <option>SILVER</option>
+                    </select>
+                </label>
+
+                <label>Points Earned
+                    <input name="Point Earned" type="number" min="119" max="1000" step="1" required>
+                </label>
+
+            </div>
+
+            <div id="create-customer-error" class="form-message" role="alert"></div>
+
+            <div class="create-customer-actions">
+                <button type="button" class="btn-form-cancel" onclick="closeCreateCustomer()">Cancel</button>
+                <button type="submit" class="btn-create-customer" id="save-customer-btn">
+                    <i class="fas fa-brain"></i> Save & Assess Risk
+                </button>
+            </div>
+        </form>
+
+    </div>
+</div>
+
+
+<!-- =====================================================
+     GRAPH MODAL
+     ===================================================== -->
+
+<div id="graph-modal" class="graph-modal-overlay">
+    <div class="graph-modal-card">
+
+        <div class="graph-modal-header">
+            <h3>
+                <i class="fas fa-chart-line"></i>
+                Customer Churn Risk Analysis
+            </h3>
+
+            <button class="graph-close-btn"
+                    onclick="closeGraph()"
+                    aria-label="Close graph">
+                &times;
+            </button>
+        </div>
+
+        <div class="graph-chart-container">
+            <canvas id="churnChart"></canvas>
+        </div>
+
+        <div class="graph-modal-footer">
+            Customer churn probability distribution
+        </div>
+
+    </div>
+</div>
+
+
+<!-- Project JavaScript -->
+<script src="/static/js/app.js"></script>
+
+</body>
+</html>

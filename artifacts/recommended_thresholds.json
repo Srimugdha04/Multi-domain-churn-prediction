@@ -1,0 +1,62 @@
+{
+    "Bank Baseline": {
+        "model": "Bank Baseline",
+        "threshold": 0.59,
+        "accuracy": 0.8326666666666667,
+        "precision": 0.5737265415549598,
+        "recall": 0.6993464052287581,
+        "f1_score": 0.6303387334315169,
+        "true_negative": 1035,
+        "false_positive": 159,
+        "false_negative": 92,
+        "true_positive": 214
+    },
+    "Pretrained Transfer - Stage 1": {
+        "model": "Pretrained Transfer - Stage 1",
+        "threshold": 0.64,
+        "accuracy": 0.826,
+        "precision": 0.5613079019073569,
+        "recall": 0.673202614379085,
+        "f1_score": 0.612184249628529,
+        "true_negative": 1033,
+        "false_positive": 161,
+        "false_negative": 100,
+        "true_positive": 206
+    },
+    "Pretrained Transfer - Fine-tuned": {
+        "model": "Pretrained Transfer - Fine-tuned",
+        "threshold": 0.61,
+        "accuracy": 0.8186666666666667,
+        "precision": 0.5429292929292929,
+        "recall": 0.7026143790849673,
+        "f1_score": 0.6125356125356125,
+        "true_negative": 1013,
+        "false_positive": 181,
+        "false_negative": 91,
+        "true_positive": 215
+    },
+    "Random Transfer - Stage 1": {
+        "model": "Random Transfer - Stage 1",
+        "threshold": 0.62,
+        "accuracy": 0.8353333333333334,
+        "precision": 0.5936507936507937,
+        "recall": 0.6111111111111112,
+        "f1_score": 0.6022544283413849,
+        "true_negative": 1066,
+        "false_positive": 128,
+        "false_negative": 119,
+        "true_positive": 187
+    },
+    "Random Transfer - Fine-tuned": {
+        "model": "Random Transfer - Fine-tuned",
+        "threshold": 0.62,
+        "accuracy": 0.8393333333333334,
+        "precision": 0.6018808777429467,
+        "recall": 0.6274509803921569,
+        "f1_score": 0.6144,
+        "true_negative": 1067,
+        "false_positive": 127,
+        "false_negative": 114,
+        "true_positive": 192
+    }
+}
